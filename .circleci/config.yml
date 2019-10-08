@@ -49,13 +49,13 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            python -m unittest -v tests/test_algorithms.py
+            python -m unittest -v
 
       - run:
           name: coverage
           command: |
             . venv/bin/activate
-            coverage run -m unittest -v tests/test_algorithms.py
+            coverage run -m unittest -v
             coverage report
             coverage html
 
