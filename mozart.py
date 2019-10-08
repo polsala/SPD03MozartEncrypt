@@ -1,5 +1,5 @@
 from math import log2, ceil
-from itertools import product
+from itertools import product, chain
 from functools import reduce
 from PIL import Image
 import numpy as np
@@ -36,9 +36,7 @@ class Mozart(object):
         self.rgb_mapping = {}
         for i, v in self.binary_fake_assign.items():
             self.rgb_mapping[i] = self.binary_to_rgb(v)
-
-        print(self.binary_fake_assign)
-        print(self.rgb_mapping)
+        self.reverse_rgb = self.rgb_mapping.__class__(map(reversed, self.rgb_mapping.items()))
 
     @staticmethod
     def divide_chunks(l, n):
@@ -83,13 +81,26 @@ class Mozart(object):
             if cp:
                 pixels.append(cp)
 
-        pixels = list(self.divide_chunks(pixels, split_key))
-        print(pixels)
+        pixels = list(self.divide_chunks(pixels, split_key))  # Need quadratic
+        # Todo in a future add matrix rotations
+        exc = split_key - len(pixels[-1])
+        if exc != 0:
+            for _ in range(0, exc):
+                pixels[-1].append((232, 20, 7))  # Todo change in a future for random
 
         array = np.array(pixels, dtype=np.uint8)
 
         new_image = Image.fromarray(array)
-        new_image.save('new.png')
+        new_image.save('image_01.png')
 
-    def decrypt(self):
-        pass
+    def decrypt(self, split_key, image_path='image_01.png'):
+        img = Image.open(image_path)
+        # pixels = list(chain(chain(np.array(img).tolist())))
+        pixels = np.array(img).tolist()
+        res = ''
+        for l in pixels:
+            for rgb in l:
+                decoded = self.reverse_rgb.get(tuple(rgb), None)
+                if decoded:
+                    res += decoded
+        return res
